@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 fn parse_input(input: &str) -> Vec<(usize, usize)> {
     let mut lists = Vec::new();
 
@@ -25,9 +27,14 @@ fn part_one(parsed_input: &[(usize, usize)]) -> usize {
 fn part_two(parsed_input: &[(usize, usize)]) -> usize {
     let (left_list, right_list): (Vec<_>, Vec<_>) = parsed_input.iter().copied().unzip();
 
+    let mut right_counts = HashMap::new();
+    for item in right_list {
+        *right_counts.entry(item).or_insert(0) += 1;
+    }
+
     left_list
         .into_iter()
-        .map(|left| left * right_list.iter().filter(|right| left == **right).count())
+        .map(|left| left * right_counts.get(&left).unwrap_or(&0))
         .sum()
 }
 
