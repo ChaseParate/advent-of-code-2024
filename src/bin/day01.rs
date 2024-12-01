@@ -1,17 +1,21 @@
 use std::collections::HashMap;
 
-fn parse_input(input: &str) -> Vec<(usize, usize)> {
+fn parse_input(input: &str) -> (Vec<usize>, Vec<usize>) {
     input
         .lines()
         .map(|line| {
             let (left, right) = line.split_once("   ").unwrap();
-            (left.parse().unwrap(), right.parse().unwrap())
+            (
+                left.parse::<usize>().unwrap(),
+                right.parse::<usize>().unwrap(),
+            )
         })
-        .collect()
+        .unzip()
 }
 
-fn part_one(parsed_input: &[(usize, usize)]) -> usize {
-    let (mut left_list, mut right_list): (Vec<_>, Vec<_>) = parsed_input.iter().copied().unzip();
+fn part_one((left_list, right_list): &(Vec<usize>, Vec<usize>)) -> usize {
+    let mut left_list = left_list.clone();
+    let mut right_list = right_list.clone();
 
     left_list.sort_unstable();
     right_list.sort_unstable();
@@ -23,9 +27,7 @@ fn part_one(parsed_input: &[(usize, usize)]) -> usize {
         .sum()
 }
 
-fn part_two(parsed_input: &[(usize, usize)]) -> usize {
-    let (left_list, right_list): (Vec<_>, Vec<_>) = parsed_input.iter().copied().unzip();
-
+fn part_two((left_list, right_list): &(Vec<usize>, Vec<usize>)) -> usize {
     let mut right_counts = HashMap::new();
     for item in right_list {
         *right_counts.entry(item).or_insert(0) += 1;
