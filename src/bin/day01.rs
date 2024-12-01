@@ -1,14 +1,13 @@
 use std::collections::HashMap;
 
 fn parse_input(input: &str) -> Vec<(usize, usize)> {
-    let mut lists = Vec::new();
-
-    for line in input.lines() {
-        let (left, right) = line.split_once("   ").unwrap();
-        lists.push((left.parse().unwrap(), right.parse().unwrap()));
-    }
-
-    lists
+    input
+        .lines()
+        .map(|line| {
+            let (left, right) = line.split_once("   ").unwrap();
+            (left.parse().unwrap(), right.parse().unwrap())
+        })
+        .collect()
 }
 
 fn part_one(parsed_input: &[(usize, usize)]) -> usize {
