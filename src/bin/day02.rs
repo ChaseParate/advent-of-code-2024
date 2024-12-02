@@ -1,53 +1,40 @@
-type ParsedInput = Vec<Vec<usize>>;
-
-fn parse_input(input: &str) -> ParsedInput {
+fn parse_input(input: &str) -> Vec<Vec<usize>> {
     input
         .lines()
-        .map(|line| line.split(' ').map(|x| x.parse().unwrap()).collect())
+        .map(|line| line.split(' ').map(|num| num.parse().unwrap()).collect())
         .collect()
 }
 
-fn is_report_valid(report: &Vec<usize>) -> bool {
-    let is_ascending = report.windows(2).all(|x| x[0] > x[1]);
-    let is_descending = report.windows(2).all(|x| x[0] < x[1]);
-    let diffs = report.windows(2).all(|x| {
-        let d = x[0].abs_diff(x[1]);
-        d >= 1 && d <= 3
-    });
+fn is_report_valid(report: &[usize]) -> bool {
+    let is_ascending = report.windows(2).all(|window| window[0] > window[1]);
+    let is_descending = report.windows(2).all(|window| window[0] < window[1]);
+    let valid_diffs = report
+        .windows(2)
+        .all(|window| (1..=3).contains(&window[0].abs_diff(window[1])));
 
-    (is_ascending || is_descending) && diffs
+    (is_ascending || is_descending) && valid_diffs
 }
 
-fn part_one(parsed_input: &ParsedInput) -> usize {
-    let mut valid_reports = 0;
-    for report in parsed_input {
-        if is_report_valid(report) {
-            valid_reports += 1;
-        }
-    }
-
-    valid_reports
+fn part_one(parsed_input: &[Vec<usize>]) -> usize {
+    parsed_input
+        .iter()
+        .filter(|report| is_report_valid(report))
+        .count()
 }
 
-fn part_two(parsed_input: &ParsedInput) -> usize {
-    let mut valid_reports = 0;
-    for report in parsed_input {
-        if is_report_valid(report) {
-            valid_reports += 1;
-        } else {
-            for i in 0..report.len() {
-                let mut copy = report.clone();
-                copy.remove(i);
+fn part_two(parsed_input: &[Vec<usize>]) -> usize {
+    parsed_input
+        .iter()
+        .filter(|&report| {
+            is_report_valid(report)
+                || (0..report.len()).any(|i| {
+                    let mut copy = report.clone();
+                    copy.remove(i);
 
-                if is_report_valid(&copy) {
-                    valid_reports += 1;
-                    break;
-                }
-            }
-        }
-    }
-
-    valid_reports
+                    is_report_valid(&copy)
+                })
+        })
+        .count()
 }
 
 fn main() {
