@@ -34,7 +34,7 @@ fn part_two((left_list, right_list): &(Vec<usize>, Vec<usize>)) -> usize {
     }
 
     left_list
-        .into_iter()
+        .iter()
         .map(|left| left * right_counts.get(&left).unwrap_or(&0))
         .sum()
 }
