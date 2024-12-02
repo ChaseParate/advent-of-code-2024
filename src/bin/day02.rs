@@ -49,29 +49,22 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn part_one_example() {
-        let input = r"7 6 4 2 1
+    const EXAMPLE_INPUT: &str = r"7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9";
 
-        let parsed_input = parse_input(input);
+    #[test]
+    fn part_one_example() {
+        let parsed_input = parse_input(EXAMPLE_INPUT);
         assert_eq!(2, part_one(&parsed_input));
     }
 
     #[test]
     fn part_two_example() {
-        let input = r"7 6 4 2 1
-1 2 7 8 9
-9 7 6 2 1
-1 3 2 4 5
-8 6 4 4 1
-1 3 6 7 9";
-
-        let parsed_input = parse_input(input);
+        let parsed_input = parse_input(EXAMPLE_INPUT);
         assert_eq!(4, part_two(&parsed_input));
     }
 }
