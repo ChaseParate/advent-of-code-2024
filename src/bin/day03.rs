@@ -12,14 +12,18 @@ fn part_one(input: &str) -> usize {
 }
 
 fn part_two(input: &str) -> usize {
-    let re = Regex::new(r"(mul|do(?:n't)?)\((\d*),?(\d*)\)").unwrap();
+    let re = Regex::new(r"(mul|do(?:n't)?)\((\d{0,3}),?(\d{0,3})\)").unwrap();
 
     re.captures_iter(input)
         .scan(true, |toggle, captures| {
-            let (_, [name, a, b]) = captures.extract();
+            let name = captures.get(1).unwrap().as_str();
 
             Some(match name {
-                "mul" => toggle.then(|| a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap()),
+                "mul" => toggle.then(|| {
+                    let a = captures.get(2).unwrap().as_str();
+                    let b = captures.get(3).unwrap().as_str();
+                    a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap()
+                }),
                 "do" => {
                     *toggle = true;
                     None
