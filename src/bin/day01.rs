@@ -28,14 +28,14 @@ fn part_one((left_list, right_list): &(Vec<usize>, Vec<usize>)) -> usize {
 }
 
 fn part_two((left_list, right_list): &(Vec<usize>, Vec<usize>)) -> usize {
-    let mut right_counts = HashMap::new();
-    for item in right_list {
-        *right_counts.entry(item).or_insert(0) += 1;
-    }
+    let right_counts = right_list.iter().fold(HashMap::new(), |mut counts, item| {
+        *counts.entry(*item).or_insert(0) += 1;
+        counts
+    });
 
     left_list
         .iter()
-        .map(|left| left * right_counts.get(&left).unwrap_or(&0))
+        .map(|left| left * right_counts.get(left).unwrap_or(&0))
         .sum()
 }
 
