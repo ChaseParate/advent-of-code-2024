@@ -12,7 +12,7 @@ fn part_one(input: &str) -> usize {
 }
 
 fn part_two(input: &str) -> usize {
-    let re = Regex::new(r"(mul|do(?:n't)?)\((\d{0,3}),?(\d{0,3})\)").unwrap();
+    let re = Regex::new(r"(mul|do|don't)\((?:(\d{1,3}),(\d{1,3}))?\)").unwrap();
 
     re.captures_iter(input)
         .scan(true, |toggle, captures| {
