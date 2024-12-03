@@ -1,7 +1,7 @@
 use regex::Regex;
 
 fn part_one(input: &str) -> usize {
-    let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
+    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
 
     re.captures_iter(input)
         .map(|captures| {
@@ -12,7 +12,7 @@ fn part_one(input: &str) -> usize {
 }
 
 fn part_two(input: &str) -> usize {
-    let re = Regex::new(r"((?:mul)|(?:do(?:n't)?))\((\d*),?(\d*)\)").unwrap();
+    let re = Regex::new(r"(mul|do(?:n't)?)\((\d*),?(\d*)\)").unwrap();
 
     re.captures_iter(input)
         .scan(true, |toggle, captures| {
@@ -48,16 +48,12 @@ mod tests {
     #[test]
     fn part_one_example() {
         let input = r"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
-        let parsed_input = parse_input(input);
-
-        assert_eq!(161, part_one(&parsed_input));
+        assert_eq!(161, part_one(&input));
     }
 
     #[test]
     fn part_two_example() {
         let input = r"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
-        let parsed_input = parse_input(input);
-
-        assert_eq!(48, part_two(&parsed_input));
+        assert_eq!(48, part_two(&input));
     }
 }
