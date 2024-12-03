@@ -1,16 +1,9 @@
 use regex::Regex;
 
-type Input = String;
-type Output = usize;
-
-fn parse_input(input: &str) -> Input {
-    input.to_owned()
-}
-
-fn part_one(parsed_input: &Input) -> Output {
+fn part_one(input: &str) -> usize {
     let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
 
-    re.captures_iter(parsed_input)
+    re.captures_iter(input)
         .map(|captures| {
             let (_, [a, b]) = captures.extract();
             a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap()
@@ -18,10 +11,10 @@ fn part_one(parsed_input: &Input) -> Output {
         .sum()
 }
 
-fn part_two(parsed_input: &Input) -> Output {
+fn part_two(input: &str) -> usize {
     let re = Regex::new(r"((?:mul)|(?:do(?:n't)?))\((\d*),?(\d*)\)").unwrap();
 
-    re.captures_iter(parsed_input)
+    re.captures_iter(input)
         .scan(true, |toggle, captures| {
             let (_, [name, a, b]) = captures.extract();
 
@@ -44,10 +37,9 @@ fn part_two(parsed_input: &Input) -> Output {
 
 fn main() {
     let input = include_str!("day03_input.txt");
-    let parsed_input = parse_input(input);
 
-    println!("Part 1: {}", part_one(&parsed_input));
-    println!("Part 2: {}", part_two(&parsed_input));
+    println!("Part 1: {}", part_one(input));
+    println!("Part 2: {}", part_two(input));
 }
 
 #[cfg(test)]
