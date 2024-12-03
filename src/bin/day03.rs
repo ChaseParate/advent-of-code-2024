@@ -10,37 +10,36 @@ fn parse_input(input: &str) -> Input {
 fn part_one(parsed_input: &Input) -> Output {
     let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
 
-    let mut sum = 0;
-    for (_, [a, b]) in re.captures_iter(&parsed_input).map(|c| c.extract()) {
-        sum += a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap();
-    }
-
-    sum
+    re.captures_iter(parsed_input)
+        .map(|captures| {
+            let (_, [a, b]) = captures.extract();
+            a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap()
+        })
+        .sum()
 }
 
 fn part_two(parsed_input: &Input) -> Output {
-    let re = Regex::new(r"((?:mul)|(?:don't)|(?:do))\((\d*),?(\d*)\)").unwrap();
+    let re = Regex::new(r"((?:mul)|(?:do(?:n't)?))\((\d*),?(\d*)\)").unwrap();
 
-    let mut toggle = true;
-    let mut sum = 0;
-    for (_, [a, b, c]) in re.captures_iter(&parsed_input).map(|c| c.extract()) {
-        match a {
-            "mul" => {
-                if toggle {
-                    sum += b.parse::<usize>().unwrap() * c.parse::<usize>().unwrap();
+    re.captures_iter(parsed_input)
+        .scan(true, |toggle, captures| {
+            let (_, [name, a, b]) = captures.extract();
+
+            Some(match name {
+                "mul" => toggle.then(|| a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap()),
+                "do" => {
+                    *toggle = true;
+                    None
                 }
-            }
-            "do" => {
-                toggle = true;
-            }
-            "don't" => {
-                toggle = false;
-            }
-            _ => panic!("something went wrong"),
-        }
-    }
-
-    sum
+                "don't" => {
+                    *toggle = false;
+                    None
+                }
+                _ => panic!("invalid instruction name: {name}"),
+            })
+        })
+        .flatten()
+        .sum()
 }
 
 fn main() {
