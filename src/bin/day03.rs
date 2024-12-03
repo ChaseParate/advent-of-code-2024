@@ -16,12 +16,12 @@ fn part_two(input: &str) -> usize {
 
     re.captures_iter(input)
         .scan(true, |toggle, captures| {
-            let name = captures.get(1).unwrap().as_str();
+            let name = &captures[1];
 
             Some(match name {
                 "mul" => toggle.then(|| {
-                    let a = captures.get(2).unwrap().as_str();
-                    let b = captures.get(3).unwrap().as_str();
+                    let a = &captures[2];
+                    let b = &captures[3];
                     a.parse::<usize>().unwrap() * b.parse::<usize>().unwrap()
                 }),
                 "do" => {
