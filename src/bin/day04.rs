@@ -5,83 +5,50 @@ fn parse_input(input: &str) -> Input {
     input.lines().map(|line| line.chars().collect()).collect()
 }
 
+fn count_matches(
+    input: &Input,
+    text: &[char],
+    extract: impl Fn(usize, usize) -> Option<Vec<char>>,
+) -> usize {
+    let width = input.len();
+    let height = input[0].len();
+
+    let reversed_text = text.iter().copied().rev().collect::<Vec<_>>();
+
+    (0..width)
+        .flat_map(|y| (0..height).map(move |x| (x, y)))
+        .filter(|(x, y)| {
+            extract(*x, *y).is_some_and(|sequence| sequence == text || sequence == reversed_text)
+        })
+        .count()
+}
+
 fn part_one(input: &Input) -> Output {
     let width = input.len();
     let height = input[0].len();
 
-    let text = "XMAS";
+    let text = "XMAS".chars().collect::<Vec<_>>();
+    let len = text.len();
 
-    let mut count = 0;
+    let horizontal = |x: usize, y: usize| {
+        (x <= width - len).then(|| (0..len).map(|i| input[y][x + i]).collect::<Vec<_>>())
+    };
+    let vertical = |x: usize, y: usize| {
+        (y <= height - len).then(|| (0..len).map(|i| input[y + i][x]).collect::<Vec<_>>())
+    };
+    let diagonal_tl_br = |x: usize, y: usize| {
+        (x <= width - len && y <= height - len)
+            .then(|| (0..len).map(|i| input[y + i][x + i]).collect::<Vec<_>>())
+    };
+    let diagonal_bl_tr = |x: usize, y: usize| {
+        (x <= width - len && y + 1 >= len && y < height)
+            .then(|| (0..len).map(|i| input[y - i][x + i]).collect::<Vec<_>>())
+    };
 
-    // horizontal
-    for y in 0..height {
-        for x in 0..=width - text.len() {
-            if matches!(
-                (
-                    input[y][x],
-                    input[y][x + 1],
-                    input[y][x + 2],
-                    input[y][x + 3]
-                ),
-                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
-            ) {
-                count += 1;
-            }
-        }
-    }
-
-    // vertical
-    for y in 0..=height - text.len() {
-        for x in 0..width {
-            if matches!(
-                (
-                    input[y][x],
-                    input[y + 1][x],
-                    input[y + 2][x],
-                    input[y + 3][x]
-                ),
-                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
-            ) {
-                count += 1;
-            }
-        }
-    }
-
-    // top left - bottom right diagonal
-    for y in 0..=height - text.len() {
-        for x in 0..=width - text.len() {
-            if matches!(
-                (
-                    input[y][x],
-                    input[y + 1][x + 1],
-                    input[y + 2][x + 2],
-                    input[y + 3][x + 3]
-                ),
-                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
-            ) {
-                count += 1;
-            }
-        }
-    }
-
-    // bottom left - top right diagonal
-    for y in text.len() - 1..height {
-        for x in 0..=width - text.len() {
-            if matches!(
-                (
-                    input[y][x],
-                    input[y - 1][x + 1],
-                    input[y - 2][x + 2],
-                    input[y - 3][x + 3]
-                ),
-                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
-            ) {
-                count += 1;
-            }
-        }
-    }
-
-    count
+    count_matches(input, &text, horizontal)
+        + count_matches(input, &text, vertical)
+        + count_matches(input, &text, diagonal_tl_br)
+        + count_matches(input, &text, diagonal_bl_tr)
 }
 
 fn part_two(input: &Input) -> Output {
