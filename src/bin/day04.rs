@@ -1,12 +1,9 @@
-type Input = Vec<Vec<char>>;
-type Output = usize;
-
-fn parse_input(input: &str) -> Input {
+fn parse_input(input: &str) -> Vec<Vec<char>> {
     input.lines().map(|line| line.chars().collect()).collect()
 }
 
 fn count_matches(
-    input: &Input,
+    input: &[Vec<char>],
     text: &[char],
     extract: impl Fn(usize, usize) -> Option<Vec<char>>,
 ) -> usize {
@@ -23,7 +20,7 @@ fn count_matches(
         .count()
 }
 
-fn part_one(input: &Input) -> Output {
+fn part_one(input: &[Vec<char>]) -> usize {
     let width = input.len();
     let height = input[0].len();
 
@@ -51,14 +48,14 @@ fn part_one(input: &Input) -> Output {
         + count_matches(input, &text, diagonal_bl_tr)
 }
 
-fn part_two(input: &Input) -> Output {
+fn part_two(input: &[Vec<char>]) -> usize {
     let mut sum = 0;
 
     let width = input.len();
     let height = input[0].len();
 
-    for y in 1..=height - 3 + 1 {
-        for x in 1..=width - 3 + 1 {
+    for y in 1..=height - 2 {
+        for x in 1..=width - 2 {
             if input[y][x] == 'A' {
                 let tl = input[y - 1][x - 1];
                 let tr = input[y - 1][x + 1];
