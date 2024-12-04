@@ -16,16 +16,15 @@ fn part_one(input: &Input) -> Output {
     // horizontal
     for y in 0..height {
         for x in 0..=width - text.len() {
-            if (input[y][x] == 'X'
-                && input[y][x + 1] == 'M'
-                && input[y][x + 2] == 'A'
-                && input[y][x + 3] == 'S')
-                || (input[y][x] == 'S'
-                    && input[y][x + 1] == 'A'
-                    && input[y][x + 2] == 'M'
-                    && input[y][x + 3] == 'X')
-            {
-                // dbg!("h", y, x);
+            if matches!(
+                (
+                    input[y][x],
+                    input[y][x + 1],
+                    input[y][x + 2],
+                    input[y][x + 3]
+                ),
+                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
+            ) {
                 count += 1;
             }
         }
@@ -34,16 +33,15 @@ fn part_one(input: &Input) -> Output {
     // vertical
     for y in 0..=height - text.len() {
         for x in 0..width {
-            if (input[y][x] == 'X'
-                && input[y + 1][x] == 'M'
-                && input[y + 2][x] == 'A'
-                && input[y + 3][x] == 'S')
-                || (input[y][x] == 'S'
-                    && input[y + 1][x] == 'A'
-                    && input[y + 2][x] == 'M'
-                    && input[y + 3][x] == 'X')
-            {
-                // dbg!("v", y, x);
+            if matches!(
+                (
+                    input[y][x],
+                    input[y + 1][x],
+                    input[y + 2][x],
+                    input[y + 3][x]
+                ),
+                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
+            ) {
                 count += 1;
             }
         }
@@ -52,16 +50,15 @@ fn part_one(input: &Input) -> Output {
     // top left - bottom right diagonal
     for y in 0..=height - text.len() {
         for x in 0..=width - text.len() {
-            if (input[y][x] == 'X'
-                && input[y + 1][x + 1] == 'M'
-                && input[y + 2][x + 2] == 'A'
-                && input[y + 3][x + 3] == 'S')
-                || (input[y][x] == 'S'
-                    && input[y + 1][x + 1] == 'A'
-                    && input[y + 2][x + 2] == 'M'
-                    && input[y + 3][x + 3] == 'X')
-            {
-                // dbg!("d1", y, x);
+            if matches!(
+                (
+                    input[y][x],
+                    input[y + 1][x + 1],
+                    input[y + 2][x + 2],
+                    input[y + 3][x + 3]
+                ),
+                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
+            ) {
                 count += 1;
             }
         }
@@ -70,16 +67,15 @@ fn part_one(input: &Input) -> Output {
     // bottom left - top right diagonal
     for y in text.len() - 1..height {
         for x in 0..=width - text.len() {
-            if (input[y][x] == 'X'
-                && input[y - 1][x + 1] == 'M'
-                && input[y - 2][x + 2] == 'A'
-                && input[y - 3][x + 3] == 'S')
-                || (input[y][x] == 'S'
-                    && input[y - 1][x + 1] == 'A'
-                    && input[y - 2][x + 2] == 'M'
-                    && input[y - 3][x + 3] == 'X')
-            {
-                // dbg!("d2", y, x);
+            if matches!(
+                (
+                    input[y][x],
+                    input[y - 1][x + 1],
+                    input[y - 2][x + 2],
+                    input[y - 3][x + 3]
+                ),
+                ('X', 'M', 'A', 'S') | ('S', 'A', 'M', 'X')
+            ) {
                 count += 1;
             }
         }
@@ -97,10 +93,13 @@ fn part_two(input: &Input) -> Output {
     for y in 1..=height - 3 + 1 {
         for x in 1..=width - 3 + 1 {
             if input[y][x] == 'A' {
-                if ((input[y - 1][x - 1] == 'M' && input[y + 1][x + 1] == 'S')
-                    || (input[y - 1][x - 1] == 'S' && input[y + 1][x + 1] == 'M'))
-                    && ((input[y + 1][x - 1] == 'M' && input[y - 1][x + 1] == 'S')
-                        || (input[y + 1][x - 1] == 'S' && input[y - 1][x + 1] == 'M'))
+                let tl = input[y - 1][x - 1];
+                let tr = input[y - 1][x + 1];
+                let bl = input[y + 1][x - 1];
+                let br = input[y + 1][x + 1];
+
+                if ((tl == 'M' && br == 'S') || (tl == 'S' && br == 'M'))
+                    && ((tr == 'M' && bl == 'S') || (tr == 'S' && bl == 'M'))
                 {
                     sum += 1;
                 }
@@ -136,12 +135,12 @@ MXMXAXMASX";
 
     #[test]
     fn diagonal() {
-        let x = r"X...
+        let simple_input = r"X...
 .M..
 ..A.
 ...S";
 
-        assert_eq!(1, part_one(&parse_input(x)));
+        assert_eq!(1, part_one(&parse_input(simple_input)));
     }
 
     #[test]
