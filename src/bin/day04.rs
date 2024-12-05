@@ -98,16 +98,6 @@ MAMMMXMMMM
 MXMXAXMASX";
 
     #[test]
-    fn diagonal() {
-        let simple_input = r"X...
-.M..
-..A.
-...S";
-
-        assert_eq!(1, part_one(&parse_input(simple_input)));
-    }
-
-    #[test]
     fn part_one_example() {
         let parsed_input = parse_input(EXAMPLE_INPUT);
         assert_eq!(18, part_one(&parsed_input));
@@ -115,11 +105,17 @@ MXMXAXMASX";
 
     #[test]
     fn part_two_example() {
-        let x = r"S.S
-.A.
-M.M";
+        let parsed_input = parse_input(EXAMPLE_INPUT);
+        assert_eq!(9, part_two(&parsed_input));
+    }
 
-        let parsed_input = parse_input(x);
-        assert_eq!(1, part_two(&parsed_input));
+    #[test]
+    fn diagonal() {
+        let simple_input = r"X...
+.M..
+..A.
+...S";
+
+        assert_eq!(1, part_one(&parse_input(simple_input)));
     }
 }
