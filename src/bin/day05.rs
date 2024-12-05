@@ -1,124 +1,106 @@
 use std::collections::{HashMap, HashSet};
 
-type Input = (Vec<(usize, usize)>, Vec<Vec<usize>>);
-type Output = usize;
+struct Input {
+    rules_map: HashMap<usize, HashSet<usize>>,
+    updates: Vec<Vec<usize>>,
+}
 
 fn parse_input(input: &str) -> Input {
-    let (left, right) = input
-        .split_once("\r\n\r\n")
-        .or(input.split_once("\n\n"))
-        .unwrap();
+    let mut lines = input.lines();
 
-    let rules = left
-        .lines()
+    let rules = lines
+        .by_ref()
+        .take_while(|line| !line.is_empty())
         .map(|line| {
             let (left, right) = line.split_once('|').unwrap();
             (left.parse().unwrap(), right.parse().unwrap())
         })
+        .collect::<Vec<(usize, usize)>>();
+
+    let mut rules_map: HashMap<usize, HashSet<usize>> = HashMap::new();
+    for (left, right) in rules {
+        rules_map.entry(left).or_default().insert(right);
+    }
+
+    let updates = lines
+        .map(|line| line.split(',').map(|num| num.parse().unwrap()).collect())
         .collect();
 
-    let printed = right
-        .lines()
-        .map(|line| line.split(',').map(|n| n.parse().unwrap()).collect())
-        .collect();
-
-    (rules, printed)
+    Input { rules_map, updates }
 }
 
-fn part_one((rules, printed): &Input) -> Output {
-    let mut rules_map: HashMap<usize, Vec<usize>> = HashMap::new();
-    for (a, b) in rules {
-        rules_map.entry(*a).or_default().push(*b);
-    }
-
-    let mut sum = 0;
-
-    'main: for seq in printed.iter() {
-        for (i, ele) in seq.iter().enumerate() {
-            if let Some(entry) = rules_map.get(ele) {
-                for prev_ele in &seq[..i] {
-                    if entry.contains(prev_ele) {
-                        continue 'main;
-                    }
-                }
-            }
-        }
-
-        sum += seq[seq.len() / 2];
-    }
-
-    sum
+fn is_invalid_update(update: &[usize], rules_map: &HashMap<usize, HashSet<usize>>) -> bool {
+    update.iter().enumerate().any(|(i, element)| {
+        rules_map.get(element).is_some_and(|next_elements| {
+            update[..i]
+                .iter()
+                .any(|previous_element| next_elements.contains(previous_element))
+        })
+    })
 }
 
-fn is_valid(seq: &[usize], rules_map: &HashMap<usize, HashSet<usize>>) -> Option<usize> {
-    for (i, ele) in seq.iter().enumerate() {
-        if let Some(entry) = rules_map.get(ele) {
-            for prev_ele in &seq[..i] {
-                if entry.contains(prev_ele) {
-                    return Some(i);
-                }
-            }
-        }
-    }
-
-    None
+fn part_one(Input { rules_map, updates }: &Input) -> usize {
+    updates
+        .iter()
+        .filter(|update| !is_invalid_update(update, rules_map))
+        .map(|update| update[update.len() / 2])
+        .sum()
 }
 
-fn topological_sort(
-    seq: &[usize],
-    rules: &Vec<(usize, usize)>,
-    rules_map: &HashMap<usize, HashSet<usize>>,
-) -> Vec<usize> {
-    let mut indegrees: HashMap<usize, usize> = HashMap::new();
-    for (before, after) in rules {
-        if seq.contains(before) && seq.contains(after) {
-            *indegrees.entry(*after).or_default() += 1;
-        }
-    }
+fn topological_sort(update: &[usize], rules_map: &HashMap<usize, HashSet<usize>>) -> Vec<usize> {
+    let mut in_degrees: HashMap<usize, usize> = rules_map
+        .iter()
+        .filter(|(element, _)| update.contains(element))
+        .flat_map(|(_, next_elements)| {
+            next_elements
+                .iter()
+                .filter(|next_element| update.contains(next_element))
+        })
+        .fold(HashMap::new(), |mut map, next_element| {
+            *map.entry(*next_element).or_default() += 1;
+            map
+        });
 
-    let mut zero_indegs = Vec::new();
-    for item in seq {
-        if *indegrees.get(item).unwrap_or(&0) == 0 {
-            zero_indegs.push(*item);
-        }
-    }
+    let mut sources = update
+        .iter()
+        .filter(|element| {
+            in_degrees
+                .get(element)
+                .is_none_or(|in_degree| *in_degree == 0)
+        })
+        .copied()
+        .collect::<Vec<_>>();
 
-    let mut output = vec![];
-    while let Some(entry) = zero_indegs.pop() {
-        output.push(entry);
+    let mut sorted = Vec::with_capacity(update.len());
+
+    while let Some(entry) = sources.pop() {
+        sorted.push(entry);
+
         if let Some(edges) = rules_map.get(&entry) {
             for edge in edges {
-                if let Some(indeg) = indegrees.get_mut(edge) {
-                    *indeg -= 1;
+                if let Some(in_degree) = in_degrees.get_mut(edge) {
+                    *in_degree -= 1;
 
-                    if *indeg == 0 {
-                        zero_indegs.push(*edge);
+                    if *in_degree == 0 {
+                        sources.push(*edge);
                     }
                 }
             }
         }
     }
 
-    output
+    sorted
 }
 
-fn part_two((rules, printed): &Input) -> Output {
-    let mut rules_map: HashMap<usize, HashSet<usize>> = HashMap::new();
-    for (a, b) in rules {
-        rules_map.entry(*a).or_default().insert(*b);
-    }
-
-    let mut sum = 0;
-
-    for seq in printed {
-        if is_valid(seq, &rules_map).is_some() {
-            let new = topological_sort(seq, rules, &rules_map);
-            dbg!(&new);
-            sum += new[new.len() / 2];
-        }
-    }
-
-    sum
+fn part_two(Input { rules_map, updates }: &Input) -> usize {
+    updates
+        .iter()
+        .filter(|update| is_invalid_update(update, rules_map))
+        .map(|update| {
+            let fixed_update = topological_sort(update, rules_map);
+            fixed_update[fixed_update.len() / 2]
+        })
+        .sum()
 }
 
 fn main() {
